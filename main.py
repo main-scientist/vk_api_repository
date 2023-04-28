@@ -1,4 +1,5 @@
 import requests
+import xlsxwriter
 import json
 
 
@@ -16,8 +17,12 @@ def get_owner_id(access_token, GROUP_NAME, API_VERSION):
 def get_info(access_token, owner_id, COUNT, API_VERSION):
     url = f'https://api.vk.com/method/wall.get?v={API_VERSION}&access_token={access_token}&owner_id={owner_id}&count={COUNT}'
     response = requests.api.get(url)
-    data = response.json()
-    print(data['response']['items'][0]['text'])
+    data = response.json()['response']['items']
+    contents = list()
+    for i in range(COUNT):
+        contents.append(data[i]['text'])
+    return contents
+    # print(data['response']['items'][0]['text'])
     # formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
     # print(formatted_json)
 
@@ -27,5 +32,17 @@ if __name__ == '__main__':
     GROUP_NAME = 'donday_volgodonsk'
     API_VERSION = '5.81'
     owner_id = '-' + get_owner_id(access_token, GROUP_NAME, API_VERSION)
-    COUNT = 1
-    get_info(access_token, owner_id, COUNT, API_VERSION)
+    COUNT = 5
+    contents = get_info(access_token, owner_id, COUNT, API_VERSION)
+
+    workbook = xlsxwriter.Workbook('Data.xlsx')
+    worksheet = workbook.add_worksheet()
+
+    row = 0
+    col = 0
+    for text in contents:
+        worksheet.write(row, col, text)
+        row += 1
+    workbook.close()
+
+
